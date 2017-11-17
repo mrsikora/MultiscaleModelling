@@ -279,6 +279,14 @@ namespace MultiscaleModelling
                                 }
                             }
                         }
+                        else 
+                        {
+                            colorToOmit = Color.FromArgb(255, 51, 204); //ustawia kolor na rozowy
+                            if (CAList.Contains(tab[i, j].Color))
+                                tab[i, j].Color = colorToOmit;
+                            else
+                                tab[i, j].Color = Color.FromArgb(255, 255, 255);
+                        }
                     }
                     else if (boundaryColoringDone)
                     {
@@ -287,15 +295,6 @@ namespace MultiscaleModelling
                             tab[i, j].Color = Color.FromArgb(255, 255, 255);
                         }
                     }
-                    else if (CAList.Count == 0)
-                    {
-                        colorToOmit = Color.FromArgb(255, 51, 204); //ustawia kolor na rozowy
-                        if (CAList.Contains(tab[i, j].Color))
-                            tab[i, j].Color = colorToOmit;
-                        else
-                            tab[i, j].Color = Color.FromArgb(255, 255, 255);
-                    }
-                    
                     else
                         tab[i, j].Color = Color.FromArgb(255, 255, 255);
                 }
@@ -673,6 +672,7 @@ namespace MultiscaleModelling
             wasProcessed = false;
             CAList.Clear();
             BoundaryList.Clear();
+            isProcessing = false;
         }
 
         private void generateButton_Click(object sender, EventArgs e)
@@ -1154,6 +1154,6 @@ namespace MultiscaleModelling
             return maxKey;
         }
 
-    
+  
     }
 }
