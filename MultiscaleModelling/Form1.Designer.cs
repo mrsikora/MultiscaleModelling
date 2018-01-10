@@ -67,6 +67,33 @@
             this.BoundaryRadioButton = new System.Windows.Forms.RadioButton();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.gbLabel = new System.Windows.Forms.Label();
+            this.mcButton = new System.Windows.Forms.Button();
+            this.mcUpDown = new System.Windows.Forms.NumericUpDown();
+            this.label13 = new System.Windows.Forms.Label();
+            this.label14 = new System.Windows.Forms.Label();
+            this.numOfStatesUpDown = new System.Windows.Forms.NumericUpDown();
+            this.energyDistributionGroupBox = new System.Windows.Forms.GroupBox();
+            this.button1 = new System.Windows.Forms.Button();
+            this.startRecrystalizationButton = new System.Windows.Forms.Button();
+            this.onEdgeCheckBox = new System.Windows.Forms.CheckBox();
+            this.numericUpDown1 = new System.Windows.Forms.NumericUpDown();
+            this.label20 = new System.Windows.Forms.Label();
+            this.iterationsNumericUpDown = new System.Windows.Forms.NumericUpDown();
+            this.label19 = new System.Windows.Forms.Label();
+            this.nucleonsOnStartNumericUpDown = new System.Windows.Forms.NumericUpDown();
+            this.label18 = new System.Windows.Forms.Label();
+            this.nucleationTypeComboBox = new System.Windows.Forms.ComboBox();
+            this.label17 = new System.Windows.Forms.Label();
+            this.distributeButton = new System.Windows.Forms.Button();
+            this.showEnergyButton = new System.Windows.Forms.Button();
+            this.energyOnEdgesNumericUpDown = new System.Windows.Forms.NumericUpDown();
+            this.energyInsideNumericUpDown = new System.Windows.Forms.NumericUpDown();
+            this.label16 = new System.Windows.Forms.Label();
+            this.label15 = new System.Windows.Forms.Label();
+            this.groupBox2 = new System.Windows.Forms.GroupBox();
+            this.homogenousRadioButton = new System.Windows.Forms.RadioButton();
+            this.heterogenousRadioButton = new System.Windows.Forms.RadioButton();
+            this.energyPictureBox = new System.Windows.Forms.PictureBox();
             ((System.ComponentModel.ISupportInitialize)(this.structureBox)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.widthUpDown)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.heightUpDown)).BeginInit();
@@ -77,6 +104,16 @@
             ((System.ComponentModel.ISupportInitialize)(this.PosibilityUpDown)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.gbSizeUpDown)).BeginInit();
             this.groupBox1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.mcUpDown)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.numOfStatesUpDown)).BeginInit();
+            this.energyDistributionGroupBox.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown1)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.iterationsNumericUpDown)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.nucleonsOnStartNumericUpDown)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.energyOnEdgesNumericUpDown)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.energyInsideNumericUpDown)).BeginInit();
+            this.groupBox2.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.energyPictureBox)).BeginInit();
             this.SuspendLayout();
             // 
             // structureBox
@@ -110,7 +147,7 @@
             this.widthUpDown.Size = new System.Drawing.Size(81, 20);
             this.widthUpDown.TabIndex = 2;
             this.widthUpDown.Value = new decimal(new int[] {
-            300,
+            100,
             0,
             0,
             0});
@@ -137,7 +174,7 @@
             this.heightUpDown.Size = new System.Drawing.Size(81, 20);
             this.heightUpDown.TabIndex = 3;
             this.heightUpDown.Value = new decimal(new int[] {
-            300,
+            100,
             0,
             0,
             0});
@@ -192,7 +229,7 @@
             this.grainsUpDown.Size = new System.Drawing.Size(120, 20);
             this.grainsUpDown.TabIndex = 7;
             this.grainsUpDown.Value = new decimal(new int[] {
-            100,
+            50,
             0,
             0,
             0});
@@ -429,7 +466,7 @@
             this.CABox.Name = "CABox";
             this.CABox.Size = new System.Drawing.Size(118, 21);
             this.CABox.TabIndex = 28;
-            this.CABox.Text = "Substructure";
+            this.CABox.Text = "Dual phase";
             // 
             // label11
             // 
@@ -470,7 +507,7 @@
             // 
             this.boundariesColorinBbutton.Location = new System.Drawing.Point(776, 248);
             this.boundariesColorinBbutton.Name = "boundariesColorinBbutton";
-            this.boundariesColorinBbutton.Size = new System.Drawing.Size(122, 36);
+            this.boundariesColorinBbutton.Size = new System.Drawing.Size(119, 36);
             this.boundariesColorinBbutton.TabIndex = 32;
             this.boundariesColorinBbutton.Text = "Boundaries coloring";
             this.boundariesColorinBbutton.UseVisualStyleBackColor = true;
@@ -527,12 +564,350 @@
             this.gbLabel.TabIndex = 37;
             this.gbLabel.Text = "% of GB";
             // 
+            // mcButton
+            // 
+            this.mcButton.Location = new System.Drawing.Point(351, 532);
+            this.mcButton.Name = "mcButton";
+            this.mcButton.Size = new System.Drawing.Size(86, 23);
+            this.mcButton.TabIndex = 39;
+            this.mcButton.Text = "Monte Carlo";
+            this.mcButton.UseVisualStyleBackColor = true;
+            this.mcButton.Click += new System.EventHandler(this.mcButton_Click);
+            // 
+            // mcUpDown
+            // 
+            this.mcUpDown.Increment = new decimal(new int[] {
+            10,
+            0,
+            0,
+            0});
+            this.mcUpDown.Location = new System.Drawing.Point(254, 532);
+            this.mcUpDown.Maximum = new decimal(new int[] {
+            1000000,
+            0,
+            0,
+            0});
+            this.mcUpDown.Minimum = new decimal(new int[] {
+            10,
+            0,
+            0,
+            0});
+            this.mcUpDown.Name = "mcUpDown";
+            this.mcUpDown.Size = new System.Drawing.Size(81, 20);
+            this.mcUpDown.TabIndex = 41;
+            this.mcUpDown.Value = new decimal(new int[] {
+            100,
+            0,
+            0,
+            0});
+            // 
+            // label13
+            // 
+            this.label13.AutoSize = true;
+            this.label13.Location = new System.Drawing.Point(183, 534);
+            this.label13.Name = "label13";
+            this.label13.Size = new System.Drawing.Size(56, 13);
+            this.label13.TabIndex = 40;
+            this.label13.Text = "MC Steps:";
+            // 
+            // label14
+            // 
+            this.label14.AutoSize = true;
+            this.label14.Location = new System.Drawing.Point(12, 534);
+            this.label14.Name = "label14";
+            this.label14.Size = new System.Drawing.Size(90, 13);
+            this.label14.TabIndex = 42;
+            this.label14.Text = "Number of states:";
+            // 
+            // numOfStatesUpDown
+            // 
+            this.numOfStatesUpDown.Location = new System.Drawing.Point(108, 534);
+            this.numOfStatesUpDown.Maximum = new decimal(new int[] {
+            150,
+            0,
+            0,
+            0});
+            this.numOfStatesUpDown.Minimum = new decimal(new int[] {
+            5,
+            0,
+            0,
+            0});
+            this.numOfStatesUpDown.Name = "numOfStatesUpDown";
+            this.numOfStatesUpDown.Size = new System.Drawing.Size(54, 20);
+            this.numOfStatesUpDown.TabIndex = 43;
+            this.numOfStatesUpDown.Value = new decimal(new int[] {
+            50,
+            0,
+            0,
+            0});
+            // 
+            // energyDistributionGroupBox
+            // 
+            this.energyDistributionGroupBox.BackColor = System.Drawing.SystemColors.ActiveBorder;
+            this.energyDistributionGroupBox.Controls.Add(this.button1);
+            this.energyDistributionGroupBox.Controls.Add(this.startRecrystalizationButton);
+            this.energyDistributionGroupBox.Controls.Add(this.onEdgeCheckBox);
+            this.energyDistributionGroupBox.Controls.Add(this.numericUpDown1);
+            this.energyDistributionGroupBox.Controls.Add(this.label20);
+            this.energyDistributionGroupBox.Controls.Add(this.iterationsNumericUpDown);
+            this.energyDistributionGroupBox.Controls.Add(this.label19);
+            this.energyDistributionGroupBox.Controls.Add(this.nucleonsOnStartNumericUpDown);
+            this.energyDistributionGroupBox.Controls.Add(this.label18);
+            this.energyDistributionGroupBox.Controls.Add(this.nucleationTypeComboBox);
+            this.energyDistributionGroupBox.Controls.Add(this.label17);
+            this.energyDistributionGroupBox.Controls.Add(this.distributeButton);
+            this.energyDistributionGroupBox.Controls.Add(this.showEnergyButton);
+            this.energyDistributionGroupBox.Controls.Add(this.energyOnEdgesNumericUpDown);
+            this.energyDistributionGroupBox.Controls.Add(this.energyInsideNumericUpDown);
+            this.energyDistributionGroupBox.Controls.Add(this.label16);
+            this.energyDistributionGroupBox.Controls.Add(this.label15);
+            this.energyDistributionGroupBox.Controls.Add(this.groupBox2);
+            this.energyDistributionGroupBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
+            this.energyDistributionGroupBox.Location = new System.Drawing.Point(15, 571);
+            this.energyDistributionGroupBox.Name = "energyDistributionGroupBox";
+            this.energyDistributionGroupBox.Size = new System.Drawing.Size(880, 101);
+            this.energyDistributionGroupBox.TabIndex = 44;
+            this.energyDistributionGroupBox.TabStop = false;
+            this.energyDistributionGroupBox.Text = "Energy distribution";
+            // 
+            // button1
+            // 
+            this.button1.Location = new System.Drawing.Point(317, 54);
+            this.button1.Name = "button1";
+            this.button1.Size = new System.Drawing.Size(119, 32);
+            this.button1.TabIndex = 59;
+            this.button1.Text = "Show energy";
+            this.button1.UseVisualStyleBackColor = true;
+            this.button1.Click += new System.EventHandler(this.button1_Click);
+            // 
+            // startRecrystalizationButton
+            // 
+            this.startRecrystalizationButton.Location = new System.Drawing.Point(692, 69);
+            this.startRecrystalizationButton.Name = "startRecrystalizationButton";
+            this.startRecrystalizationButton.Size = new System.Drawing.Size(168, 26);
+            this.startRecrystalizationButton.TabIndex = 57;
+            this.startRecrystalizationButton.Text = "Start recrystalization";
+            this.startRecrystalizationButton.UseVisualStyleBackColor = true;
+            this.startRecrystalizationButton.Click += new System.EventHandler(this.startRecrystalizationButton_Click);
+            // 
+            // onEdgeCheckBox
+            // 
+            this.onEdgeCheckBox.AutoSize = true;
+            this.onEdgeCheckBox.Checked = true;
+            this.onEdgeCheckBox.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.onEdgeCheckBox.Location = new System.Drawing.Point(692, 46);
+            this.onEdgeCheckBox.Name = "onEdgeCheckBox";
+            this.onEdgeCheckBox.Size = new System.Drawing.Size(73, 17);
+            this.onEdgeCheckBox.TabIndex = 56;
+            this.onEdgeCheckBox.Text = "On edge?";
+            this.onEdgeCheckBox.UseVisualStyleBackColor = true;
+            // 
+            // numericUpDown1
+            // 
+            this.numericUpDown1.Increment = new decimal(new int[] {
+            10,
+            0,
+            0,
+            0});
+            this.numericUpDown1.Location = new System.Drawing.Point(777, 14);
+            this.numericUpDown1.Name = "numericUpDown1";
+            this.numericUpDown1.Size = new System.Drawing.Size(54, 20);
+            this.numericUpDown1.TabIndex = 55;
+            this.numericUpDown1.Value = new decimal(new int[] {
+            10,
+            0,
+            0,
+            0});
+            // 
+            // label20
+            // 
+            this.label20.AutoSize = true;
+            this.label20.Location = new System.Drawing.Point(689, 16);
+            this.label20.Name = "label20";
+            this.label20.Size = new System.Drawing.Size(82, 13);
+            this.label20.TabIndex = 54;
+            this.label20.Text = "Nucleation rate:";
+            // 
+            // iterationsNumericUpDown
+            // 
+            this.iterationsNumericUpDown.Location = new System.Drawing.Point(560, 66);
+            this.iterationsNumericUpDown.Name = "iterationsNumericUpDown";
+            this.iterationsNumericUpDown.Size = new System.Drawing.Size(54, 20);
+            this.iterationsNumericUpDown.TabIndex = 53;
+            this.iterationsNumericUpDown.Value = new decimal(new int[] {
+            10,
+            0,
+            0,
+            0});
+            // 
+            // label19
+            // 
+            this.label19.AutoSize = true;
+            this.label19.Location = new System.Drawing.Point(470, 65);
+            this.label19.Name = "label19";
+            this.label19.Size = new System.Drawing.Size(53, 13);
+            this.label19.TabIndex = 52;
+            this.label19.Text = "Iterations:";
+            // 
+            // nucleonsOnStartNumericUpDown
+            // 
+            this.nucleonsOnStartNumericUpDown.Location = new System.Drawing.Point(560, 40);
+            this.nucleonsOnStartNumericUpDown.Name = "nucleonsOnStartNumericUpDown";
+            this.nucleonsOnStartNumericUpDown.Size = new System.Drawing.Size(54, 20);
+            this.nucleonsOnStartNumericUpDown.TabIndex = 51;
+            this.nucleonsOnStartNumericUpDown.Value = new decimal(new int[] {
+            5,
+            0,
+            0,
+            0});
+            // 
+            // label18
+            // 
+            this.label18.AutoSize = true;
+            this.label18.Location = new System.Drawing.Point(470, 42);
+            this.label18.Name = "label18";
+            this.label18.Size = new System.Drawing.Size(93, 13);
+            this.label18.TabIndex = 50;
+            this.label18.Text = "Nucleons on start:";
+            // 
+            // nucleationTypeComboBox
+            // 
+            this.nucleationTypeComboBox.FormattingEnabled = true;
+            this.nucleationTypeComboBox.Items.AddRange(new object[] {
+            "At the beginning of simulation",
+            "Constant",
+            "Increasing"});
+            this.nucleationTypeComboBox.Location = new System.Drawing.Point(560, 13);
+            this.nucleationTypeComboBox.Name = "nucleationTypeComboBox";
+            this.nucleationTypeComboBox.Size = new System.Drawing.Size(109, 21);
+            this.nucleationTypeComboBox.TabIndex = 49;
+            this.nucleationTypeComboBox.Text = "Constant";
+            // 
+            // label17
+            // 
+            this.label17.AutoSize = true;
+            this.label17.Location = new System.Drawing.Point(470, 16);
+            this.label17.Name = "label17";
+            this.label17.Size = new System.Drawing.Size(84, 13);
+            this.label17.TabIndex = 48;
+            this.label17.Text = "Nucleation type:";
+            // 
+            // distributeButton
+            // 
+            this.distributeButton.Location = new System.Drawing.Point(317, 19);
+            this.distributeButton.Name = "distributeButton";
+            this.distributeButton.Size = new System.Drawing.Size(119, 32);
+            this.distributeButton.TabIndex = 47;
+            this.distributeButton.Text = "Distribute";
+            this.distributeButton.UseVisualStyleBackColor = true;
+            this.distributeButton.Click += new System.EventHandler(this.distributeButton_Click);
+         
+            // 
+            // energyOnEdgesNumericUpDown
+            // 
+            this.energyOnEdgesNumericUpDown.Location = new System.Drawing.Point(239, 63);
+            this.energyOnEdgesNumericUpDown.Maximum = new decimal(new int[] {
+            5,
+            0,
+            0,
+            0});
+            this.energyOnEdgesNumericUpDown.Name = "energyOnEdgesNumericUpDown";
+            this.energyOnEdgesNumericUpDown.Size = new System.Drawing.Size(54, 20);
+            this.energyOnEdgesNumericUpDown.TabIndex = 45;
+            this.energyOnEdgesNumericUpDown.Value = new decimal(new int[] {
+            5,
+            0,
+            0,
+            0});
+            // 
+            // energyInsideNumericUpDown
+            // 
+            this.energyInsideNumericUpDown.Location = new System.Drawing.Point(239, 31);
+            this.energyInsideNumericUpDown.Maximum = new decimal(new int[] {
+            5,
+            0,
+            0,
+            0});
+            this.energyInsideNumericUpDown.Name = "energyInsideNumericUpDown";
+            this.energyInsideNumericUpDown.Size = new System.Drawing.Size(54, 20);
+            this.energyInsideNumericUpDown.TabIndex = 44;
+            this.energyInsideNumericUpDown.Value = new decimal(new int[] {
+            5,
+            0,
+            0,
+            0});
+            // 
+            // label16
+            // 
+            this.label16.AutoSize = true;
+            this.label16.Location = new System.Drawing.Point(142, 65);
+            this.label16.Name = "label16";
+            this.label16.Size = new System.Drawing.Size(90, 13);
+            this.label16.TabIndex = 42;
+            this.label16.Text = "Energy on edges:";
+            // 
+            // label15
+            // 
+            this.label15.AutoSize = true;
+            this.label15.Location = new System.Drawing.Point(159, 38);
+            this.label15.Name = "label15";
+            this.label15.Size = new System.Drawing.Size(73, 13);
+            this.label15.TabIndex = 41;
+            this.label15.Text = "Energy inside:";
+            // 
+            // groupBox2
+            // 
+            this.groupBox2.Controls.Add(this.homogenousRadioButton);
+            this.groupBox2.Controls.Add(this.heterogenousRadioButton);
+            this.groupBox2.Location = new System.Drawing.Point(6, 19);
+            this.groupBox2.Name = "groupBox2";
+            this.groupBox2.Size = new System.Drawing.Size(99, 68);
+            this.groupBox2.TabIndex = 37;
+            this.groupBox2.TabStop = false;
+            // 
+            // homogenousRadioButton
+            // 
+            this.homogenousRadioButton.AutoSize = true;
+            this.homogenousRadioButton.Checked = true;
+            this.homogenousRadioButton.Location = new System.Drawing.Point(6, 19);
+            this.homogenousRadioButton.Name = "homogenousRadioButton";
+            this.homogenousRadioButton.Size = new System.Drawing.Size(88, 17);
+            this.homogenousRadioButton.TabIndex = 34;
+            this.homogenousRadioButton.TabStop = true;
+            this.homogenousRadioButton.Text = "Homogenous";
+            this.homogenousRadioButton.UseVisualStyleBackColor = true;
+            // 
+            // heterogenousRadioButton
+            // 
+            this.heterogenousRadioButton.AutoSize = true;
+            this.heterogenousRadioButton.Location = new System.Drawing.Point(6, 42);
+            this.heterogenousRadioButton.Name = "heterogenousRadioButton";
+            this.heterogenousRadioButton.Size = new System.Drawing.Size(92, 17);
+            this.heterogenousRadioButton.TabIndex = 35;
+            this.heterogenousRadioButton.Text = "Heterogenous";
+            this.heterogenousRadioButton.UseVisualStyleBackColor = true;
+            // 
+            // energyPictureBox
+            // 
+            this.energyPictureBox.Location = new System.Drawing.Point(12, 22);
+            this.energyPictureBox.Name = "energyPictureBox";
+            this.energyPictureBox.Size = new System.Drawing.Size(500, 500);
+            this.energyPictureBox.TabIndex = 45;
+            this.energyPictureBox.TabStop = false;
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.SystemColors.ButtonFace;
-            this.ClientSize = new System.Drawing.Size(910, 539);
+            this.ClientSize = new System.Drawing.Size(910, 669);
+            this.Controls.Add(this.energyPictureBox);
+            this.Controls.Add(this.energyDistributionGroupBox);
+            this.Controls.Add(this.numOfStatesUpDown);
+            this.Controls.Add(this.label14);
+            this.Controls.Add(this.mcUpDown);
+            this.Controls.Add(this.label13);
+            this.Controls.Add(this.mcButton);
             this.Controls.Add(this.gbLabel);
             this.Controls.Add(this.groupBox1);
             this.Controls.Add(this.ClearGrainsButton);
@@ -576,6 +951,18 @@
             ((System.ComponentModel.ISupportInitialize)(this.gbSizeUpDown)).EndInit();
             this.groupBox1.ResumeLayout(false);
             this.groupBox1.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.mcUpDown)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.numOfStatesUpDown)).EndInit();
+            this.energyDistributionGroupBox.ResumeLayout(false);
+            this.energyDistributionGroupBox.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown1)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.iterationsNumericUpDown)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.nucleonsOnStartNumericUpDown)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.energyOnEdgesNumericUpDown)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.energyInsideNumericUpDown)).EndInit();
+            this.groupBox2.ResumeLayout(false);
+            this.groupBox2.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.energyPictureBox)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -621,6 +1008,33 @@
         private System.Windows.Forms.RadioButton BoundaryRadioButton;
         private System.Windows.Forms.GroupBox groupBox1;
         private System.Windows.Forms.Label gbLabel;
+        private System.Windows.Forms.Button mcButton;
+        private System.Windows.Forms.NumericUpDown mcUpDown;
+        private System.Windows.Forms.Label label13;
+        private System.Windows.Forms.Label label14;
+        private System.Windows.Forms.NumericUpDown numOfStatesUpDown;
+        private System.Windows.Forms.GroupBox energyDistributionGroupBox;
+        private System.Windows.Forms.GroupBox groupBox2;
+        private System.Windows.Forms.RadioButton homogenousRadioButton;
+        private System.Windows.Forms.RadioButton heterogenousRadioButton;
+        private System.Windows.Forms.NumericUpDown energyOnEdgesNumericUpDown;
+        private System.Windows.Forms.NumericUpDown energyInsideNumericUpDown;
+        private System.Windows.Forms.Label label16;
+        private System.Windows.Forms.Label label15;
+        private System.Windows.Forms.Button showEnergyButton;
+        public System.Windows.Forms.PictureBox energyPictureBox;
+        private System.Windows.Forms.Button distributeButton;
+        private System.Windows.Forms.Label label17;
+        private System.Windows.Forms.ComboBox nucleationTypeComboBox;
+        private System.Windows.Forms.Button startRecrystalizationButton;
+        private System.Windows.Forms.CheckBox onEdgeCheckBox;
+        private System.Windows.Forms.NumericUpDown numericUpDown1;
+        private System.Windows.Forms.Label label20;
+        private System.Windows.Forms.NumericUpDown iterationsNumericUpDown;
+        private System.Windows.Forms.Label label19;
+        private System.Windows.Forms.NumericUpDown nucleonsOnStartNumericUpDown;
+        private System.Windows.Forms.Label label18;
+        private System.Windows.Forms.Button button1;
     }
 }
 

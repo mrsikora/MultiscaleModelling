@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
@@ -20,7 +21,13 @@ namespace MultiscaleModelling
         Thread thread;
         List<Color> CAList = new List<Color>();
         List<Color> BoundaryList = new List<Color>();
+        List<int> stateOfMCNeighbors = new List<int>();
+        ///do random
+        static List<Cell> notMCCheckedList = new List<Cell>();
+        /// do random
+        Dictionary<Color, int> matchState = new Dictionary<Color, int>();
         Color colorToOmit = new Color();
+        Dictionary<int, int> checkState = new Dictionary<int, int>(); //do sprawdzenia ktorego state jest najwiecej
 
         public Form1()
         {
@@ -28,7 +35,10 @@ namespace MultiscaleModelling
             //form = this;
             growthButton.Enabled = false;
             generateButton.Enabled = false;
-
+            mcButton.Enabled = false;
+            energyPictureBox.Visible = false;
+            structureBox.Enabled = true;
+            this.CenterToScreen();
         }
 
         private void Form1_Load(object sender, EventArgs e)
@@ -93,38 +103,76 @@ namespace MultiscaleModelling
                 }
                 return bm;
             }
+
+            public Bitmap setEnergyColor(int structureBoxWidth, int structureBoxHeight)
+            {
+                float cellWidth = (float)structureBoxWidth / (float)structWidth;
+                float cellHeight = (float)structureBoxHeight / (float)structHeight;
+                float minCellSize = Math.Min(cellWidth, cellHeight);
+                //ZMIANA
+                //form.structureBox.Width = structureBoxWidth;
+                //form.structureBox.Height = structureBoxHeight;
+                Bitmap bm = new Bitmap(Convert.ToInt32(structWidth * minCellSize), Convert.ToInt32(structHeight * minCellSize));
+
+                using (Graphics g = Graphics.FromImage(bm))
+                {
+                    for (int i = 0; i < structWidth; i++)
+                    {
+                        for (int j = 0; j < structHeight; j++)
+                        {
+                            g.FillRectangle(new SolidBrush(prevCells[i, j].EnergyColor), minCellSize * prevCells[i, j].X, minCellSize * prevCells[i, j].Y, minCellSize, minCellSize);
+                        }
+                    }
+                }
+                return bm;
+            }
         }
 
         class Cell
         {
             int x, y = 0;
+            int state = 0;
+            int energy = 0;
             Color color;
- 
+            Color energyColor;
+
 
             public Cell()
             {
                 this.x = 0;
                 this.y = 0;
-                this.color = Color.FromArgb(255, 255, 255);    
+                this.state = 0;
+                this.energy = 0;
+                this.color = Color.FromArgb(255, 255, 255);
+                this.energyColor = Color.FromArgb(255, 255, 255);
             }
 
             public Cell(int x, int y)
             {
                 this.x = x;
                 this.y = y;
+                this.state = 0;
+                this.energy = 0;
                 this.color = Color.FromArgb(255, 255, 255);
+                this.energyColor = Color.FromArgb(255, 255, 255);
             }
 
             public Cell(int x, int y, Color color)
             {
                 this.x = x;
                 this.y = y;
+                this.state = 0;
+                this.energy = 0;
                 this.color = color;
+                this.energyColor = Color.FromArgb(255, 255, 255);
             }
 
             public Color Color { get => color; set => color = value; }
             public int X { get => x; set => x = value; }
             public int Y { get => y; set => y = value; }
+            public int State { get => state; set => state = value; }
+            public int Energy { get => energy; set => energy = value; }
+            public Color EnergyColor { get => energyColor; set => energyColor = value; }
         }
 
         /////// EXPORTS AND IMPORTS /////// 
@@ -261,7 +309,7 @@ namespace MultiscaleModelling
             {
                 for (int j = 0; j < structure.StructHeight; j++)
                 {
-                    if (CAList.Count > 0 && boundaryColoringDone==false)
+                    if (CAList.Count > 0 && boundaryColoringDone == false)
                     {
                         if (caMethod == "Substructure")
                         {
@@ -279,7 +327,7 @@ namespace MultiscaleModelling
                                 }
                             }
                         }
-                        else 
+                        else
                         {
                             colorToOmit = Color.FromArgb(255, 51, 204); //ustawia kolor na rozowy
                             if (CAList.Contains(tab[i, j].Color))
@@ -314,22 +362,22 @@ namespace MultiscaleModelling
 
             cell.Color = Color.FromArgb(r, g, b);
         }
-      
+
         private void structureBox_Click(object sender, EventArgs e)  //pobranie współrządnych klikniętego punktu z structureBox, czyli od 0 do 500
         {
-            if (wasProcessed)
-            {
-                MouseEventArgs me = (MouseEventArgs)e;
-                int X = me.X * (int)widthUpDown.Value / structureBox.Width; // pozycja myszki x razy ilość kwadratów (szerokość, którą podaję) przez szerokość okna (500)
-                int Y = me.Y * (int)heightUpDown.Value / structureBox.Height;
+            // if (wasProcessed)
+            // {
+            MouseEventArgs me = (MouseEventArgs)e;
+            int X = me.X * (int)widthUpDown.Value / structureBox.Width; // pozycja myszki x razy ilość kwadratów (szerokość, którą podaję) przez szerokość okna (500)
+            int Y = me.Y * (int)heightUpDown.Value / structureBox.Height;
 
-                //MessageBox.Show(string.Format("X: {0},Y: {1} ", X, Y));
-                MessageBox.Show(string.Format("Selected {0}", structure.CurrentCells[X, Y].Color.ToString()));
-                if (caRadioButton.Checked)
-                    CAList.Add(structure.CurrentCells[X, Y].Color);
-                else
-                    BoundaryList.Add(structure.CurrentCells[X, Y].Color);
-            }
+            //MessageBox.Show(string.Format("X: {0},Y: {1} ", X, Y));
+            MessageBox.Show(string.Format("Selected {0}", structure.CurrentCells[X, Y].Color.ToString()));
+            if (caRadioButton.Checked)
+                CAList.Add(structure.CurrentCells[X, Y].Color);
+            else
+                BoundaryList.Add(structure.CurrentCells[X, Y].Color);
+            // }
         }
 
         private void updatePrevCells()
@@ -340,7 +388,8 @@ namespace MultiscaleModelling
             {
                 for (int j = 0; j < structure.StructHeight; j++)
                 {
-                    structure.PrevCells[i, j].Color = structure.CurrentCells[i, j].Color; 
+                    structure.PrevCells[i, j].Color = structure.CurrentCells[i, j].Color;
+                    structure.PrevCells[i, j].EnergyColor = structure.CurrentCells[i, j].EnergyColor;
                     if (structure.PrevCells[i, j].Color.Equals(Color.FromArgb(255, 255, 255)))
                         allNotWhite = false;
                 }
@@ -361,7 +410,8 @@ namespace MultiscaleModelling
             } while (isProcessing);
             MessageBox.Show("Growth finished");
             wasProcessed = true;
-
+            CAList.Clear();
+            BoundaryList.Clear();
         }
 
         void growth4rule()
@@ -571,10 +621,10 @@ namespace MultiscaleModelling
             int wUpDown = (int)widthUpDown.Value;
             int hUpDown = (int)heightUpDown.Value;
             int iprev, inext, jprev, jnext = 0;
-          
 
-                for (int i = 0; i < structure.StructWidth; i++)
-                {
+
+            for (int i = 0; i < structure.StructWidth; i++)
+            {
                 for (int j = 0; j < structure.StructHeight; j++)
                 {
                     if (i == 0)
@@ -652,7 +702,7 @@ namespace MultiscaleModelling
                     }
                 }
             }
-      
+
             updatePrevCells();
             refreshStructureBox();
             growthButton.Enabled = true;
@@ -669,6 +719,7 @@ namespace MultiscaleModelling
             structure = new Structure(wUpDown, hUpDown);
             refreshStructureBox();
             generateButton.Enabled = true;
+            mcButton.Enabled = true;
             wasProcessed = false;
             CAList.Clear();
             BoundaryList.Clear();
@@ -680,6 +731,7 @@ namespace MultiscaleModelling
             try
             {
                 clearStructureBox(structure.CurrentCells);
+                clearStates();
                 int wUpDown = (int)widthUpDown.Value;
                 int hUpDown = (int)heightUpDown.Value;
                 int numOfGrains = (int)grainsUpDown.Value;
@@ -688,7 +740,7 @@ namespace MultiscaleModelling
                 {
                     int randX = rand.Next(wUpDown);
                     int randY = rand.Next(hUpDown);
-                    if (structure.CurrentCells[randX, randY].Color.Equals(Color.FromArgb(255,255,255)))
+                    if (structure.CurrentCells[randX, randY].Color.Equals(Color.FromArgb(255, 255, 255)))
                         setRandomColor(structure.CurrentCells[randX, randY]);
                     else
                         i--;
@@ -697,9 +749,10 @@ namespace MultiscaleModelling
                 refreshStructureBox();
                 growthButton.Enabled = true;
             }
-            catch
+            catch (Exception ex)
             {
-                MessageBox.Show("Please set the structure first");
+                //MessageBox.Show("Please set the structure first");
+                MessageBox.Show(ex.Message);
             }
         }
 
@@ -756,7 +809,7 @@ namespace MultiscaleModelling
         {
             isProcessing = true;
             // generateButton.Enabled = false;
-            
+
             try
             {
                 string choose = methodComboBox.SelectedItem.ToString();
@@ -773,7 +826,6 @@ namespace MultiscaleModelling
                     thread.IsBackground = true;
                     thread.Start();
                 }
-
             }
             catch
             {
@@ -781,7 +833,8 @@ namespace MultiscaleModelling
             }
             finally
             {
-                //CAList.Clear();
+                // CAList.Clear();
+                //   BoundaryList.Clear();
             }
         }
 
@@ -794,7 +847,7 @@ namespace MultiscaleModelling
         {
             int numOfWhite = 0;
             for (int i = 0; i < structure.StructWidth; i++)
-            { 
+            {
                 for (int j = 0; j < structure.StructHeight; j++)
                 {
                     if (structure.CurrentCells[i, j].Color != Color.FromArgb(0, 0, 0))
@@ -809,7 +862,7 @@ namespace MultiscaleModelling
 
             double gbPercent = (double)(structure.CurrentCells.Length - numOfWhite) / (double)structure.CurrentCells.Length * 100.0;
             gbPercent = Math.Round(gbPercent, 2);
-            gbLabel.Text = gbPercent.ToString() + "% of GB"; 
+            gbLabel.Text = gbPercent.ToString() + "% of GB";
         }
         ///////////END OF BUTTONS ///////////
 
@@ -859,6 +912,7 @@ namespace MultiscaleModelling
             }
             //przepisuje z current do prev po wykonaniu step moore
             updatePrevCells();
+
         }
 
         void changeMooreColor(int x, int y, int wUpDown, int hUpDown)
@@ -947,6 +1001,7 @@ namespace MultiscaleModelling
                 {
                     structure.CurrentCells[x, y].Color = maxKey;
                 }
+                matchColor.Clear();
             }
         }
 
@@ -970,7 +1025,7 @@ namespace MultiscaleModelling
                 {
 
                     // czy ziarno jest "w srodku" (otoczone tym samym kolorem)-jego nie procesujemy
-                    if (!structure.CurrentCells[i, j].Color.Equals(Color.FromArgb(255, 255, 255)) && !structure.CurrentCells[i, j].Color.Equals(Color.FromArgb(0, 0, 0)) && !structure.CurrentCells[i, j].Color.Equals(colorToOmit)&& !CAList.Contains(structure.CurrentCells[i, j].Color))
+                    if (!structure.CurrentCells[i, j].Color.Equals(Color.FromArgb(255, 255, 255)) && !structure.CurrentCells[i, j].Color.Equals(Color.FromArgb(0, 0, 0)) && !structure.CurrentCells[i, j].Color.Equals(colorToOmit) && !CAList.Contains(structure.CurrentCells[i, j].Color))
                     {
 
                         if (j == 0)
@@ -1030,49 +1085,49 @@ namespace MultiscaleModelling
                 else
                     ynext = y + 1;
                 //sprawdzanie sąsiadów i dodawanie do listy
-                if (!structure.PrevCells[xprev, y].Color.Equals(Color.FromArgb(255, 255, 255)) && !structure.PrevCells[xprev, y].Color.Equals(Color.FromArgb(0, 0, 0)) && !structure.CurrentCells[xprev, y].Color.Equals(colorToOmit) && !CAList.Contains(structure.CurrentCells[xprev,y].Color))
+                if (!structure.PrevCells[xprev, y].Color.Equals(Color.FromArgb(255, 255, 255)) && !structure.PrevCells[xprev, y].Color.Equals(Color.FromArgb(0, 0, 0)) && !structure.CurrentCells[xprev, y].Color.Equals(colorToOmit) && !CAList.Contains(structure.CurrentCells[xprev, y].Color))
                 {
                     neighbours.Add(structure.PrevCells[xprev, y].Color);
                     closeNeighbours.Add(structure.PrevCells[xprev, y].Color);
                 }
 
-                if (!structure.PrevCells[xprev, yprev].Color.Equals(Color.FromArgb(255, 255, 255)) && !structure.PrevCells[xprev, yprev].Color.Equals(Color.FromArgb(0, 0, 0)) && !structure.CurrentCells[xprev, yprev].Color.Equals(colorToOmit) && !CAList.Contains(structure.CurrentCells[xprev,yprev].Color))
+                if (!structure.PrevCells[xprev, yprev].Color.Equals(Color.FromArgb(255, 255, 255)) && !structure.PrevCells[xprev, yprev].Color.Equals(Color.FromArgb(0, 0, 0)) && !structure.CurrentCells[xprev, yprev].Color.Equals(colorToOmit) && !CAList.Contains(structure.CurrentCells[xprev, yprev].Color))
                 {
                     neighbours.Add(structure.PrevCells[xprev, yprev].Color);
                     farNeighbours.Add(structure.PrevCells[xprev, yprev].Color);
                 }
 
-                if (!structure.PrevCells[x, yprev].Color.Equals(Color.FromArgb(255, 255, 255)) && !structure.PrevCells[x, yprev].Color.Equals(Color.FromArgb(0, 0, 0)) && !structure.CurrentCells[x, yprev].Color.Equals(colorToOmit) && !CAList.Contains(structure.CurrentCells[x,yprev].Color))
+                if (!structure.PrevCells[x, yprev].Color.Equals(Color.FromArgb(255, 255, 255)) && !structure.PrevCells[x, yprev].Color.Equals(Color.FromArgb(0, 0, 0)) && !structure.CurrentCells[x, yprev].Color.Equals(colorToOmit) && !CAList.Contains(structure.CurrentCells[x, yprev].Color))
                 {
                     neighbours.Add(structure.PrevCells[x, yprev].Color);
                     closeNeighbours.Add(structure.PrevCells[x, yprev].Color);
                 }
 
-                if (!structure.PrevCells[xnext, yprev].Color.Equals(Color.FromArgb(255, 255, 255)) && !structure.PrevCells[xnext, yprev].Color.Equals(Color.FromArgb(0, 0, 0)) && !structure.CurrentCells[xnext, yprev].Color.Equals(colorToOmit) && !CAList.Contains(structure.CurrentCells[xnext,yprev].Color))
+                if (!structure.PrevCells[xnext, yprev].Color.Equals(Color.FromArgb(255, 255, 255)) && !structure.PrevCells[xnext, yprev].Color.Equals(Color.FromArgb(0, 0, 0)) && !structure.CurrentCells[xnext, yprev].Color.Equals(colorToOmit) && !CAList.Contains(structure.CurrentCells[xnext, yprev].Color))
                 {
                     neighbours.Add(structure.PrevCells[xnext, yprev].Color);
                     farNeighbours.Add(structure.PrevCells[xnext, yprev].Color);
                 }
 
-                if (!structure.PrevCells[xnext, y].Color.Equals(Color.FromArgb(255, 255, 255)) && !structure.PrevCells[xnext, y].Color.Equals(Color.FromArgb(0, 0, 0)) && !structure.CurrentCells[xnext, y].Color.Equals(colorToOmit) && !CAList.Contains(structure.CurrentCells[xnext,y].Color))
+                if (!structure.PrevCells[xnext, y].Color.Equals(Color.FromArgb(255, 255, 255)) && !structure.PrevCells[xnext, y].Color.Equals(Color.FromArgb(0, 0, 0)) && !structure.CurrentCells[xnext, y].Color.Equals(colorToOmit) && !CAList.Contains(structure.CurrentCells[xnext, y].Color))
                 {
                     neighbours.Add(structure.PrevCells[xnext, y].Color);
                     closeNeighbours.Add(structure.PrevCells[xnext, y].Color);
                 }
 
-                if (!structure.PrevCells[xnext, ynext].Color.Equals(Color.FromArgb(255, 255, 255)) && !structure.PrevCells[xnext, ynext].Color.Equals(Color.FromArgb(0, 0, 0)) && !structure.CurrentCells[xnext, ynext].Color.Equals(colorToOmit) && !CAList.Contains(structure.CurrentCells[xnext,ynext].Color))
+                if (!structure.PrevCells[xnext, ynext].Color.Equals(Color.FromArgb(255, 255, 255)) && !structure.PrevCells[xnext, ynext].Color.Equals(Color.FromArgb(0, 0, 0)) && !structure.CurrentCells[xnext, ynext].Color.Equals(colorToOmit) && !CAList.Contains(structure.CurrentCells[xnext, ynext].Color))
                 {
                     neighbours.Add(structure.PrevCells[xnext, ynext].Color);
                     farNeighbours.Add(structure.PrevCells[xnext, ynext].Color);
                 }
 
-                if (!structure.PrevCells[x, ynext].Color.Equals(Color.FromArgb(255, 255, 255)) && !structure.PrevCells[x, ynext].Color.Equals(Color.FromArgb(0, 0, 0)) && !structure.CurrentCells[x, ynext].Color.Equals(colorToOmit) && !CAList.Contains(structure.CurrentCells[x,ynext].Color))
+                if (!structure.PrevCells[x, ynext].Color.Equals(Color.FromArgb(255, 255, 255)) && !structure.PrevCells[x, ynext].Color.Equals(Color.FromArgb(0, 0, 0)) && !structure.CurrentCells[x, ynext].Color.Equals(colorToOmit) && !CAList.Contains(structure.CurrentCells[x, ynext].Color))
                 {
                     neighbours.Add(structure.PrevCells[x, ynext].Color);
                     closeNeighbours.Add(structure.PrevCells[x, ynext].Color);
                 }
 
-                if (!structure.PrevCells[xprev, ynext].Color.Equals(Color.FromArgb(255, 255, 255)) && !structure.PrevCells[xprev, ynext].Color.Equals(Color.FromArgb(0, 0, 0)) && !structure.CurrentCells[xprev, ynext].Color.Equals(colorToOmit) && !CAList.Contains(structure.CurrentCells[xprev,ynext].Color))
+                if (!structure.PrevCells[xprev, ynext].Color.Equals(Color.FromArgb(255, 255, 255)) && !structure.PrevCells[xprev, ynext].Color.Equals(Color.FromArgb(0, 0, 0)) && !structure.CurrentCells[xprev, ynext].Color.Equals(colorToOmit) && !CAList.Contains(structure.CurrentCells[xprev, ynext].Color))
                 {
                     neighbours.Add(structure.PrevCells[xprev, ynext].Color);
                     farNeighbours.Add(structure.PrevCells[xprev, ynext].Color);
@@ -1154,6 +1209,826 @@ namespace MultiscaleModelling
             return maxKey;
         }
 
-  
+        /// //////////////...............MONTE CARLO............///////////////////////
+
+        private void mcButton_Click(object sender, EventArgs e)
+        {
+            generateMCstructure();
+            int wUpDown = (int)widthUpDown.Value;
+            int hUpDown = (int)heightUpDown.Value;
+
+            thread = new Thread(new ThreadStart(monteCarloMethod));
+            thread.IsBackground = true;
+            thread.Start();
+        }
+
+        public void generateMCstructure()
+        {
+            int numOfStates = (int)numOfStatesUpDown.Value;
+            try
+            {
+                //clearStructureBox(structure.CurrentCells);
+                clearStates();
+                int wUpDown = (int)widthUpDown.Value;
+                int hUpDown = (int)heightUpDown.Value;
+                int addedState = 0;
+                int temp = 0;
+                Color colorToSet;
+                Color tempColor;
+
+                for (int i = 0; i < numOfStates; i++)   //tworzenie mapy state - color
+                {
+                    int r, g, b, wsp;
+
+                    wsp = rand.Next(1000);
+                    r = rand.Next(0, (256 + wsp) + 1) % 256;
+                    g = rand.Next(0, (512 + wsp) + 1) % 256;
+                    b = rand.Next(0, (1024 + wsp) + 1) % 256;
+                    matchState.Add(Color.FromArgb(r, g, b), i);
+                }
+
+                for (int i = 0; i < wUpDown; i++)
+                {
+                    for (int j = 0; j < hUpDown; j++)
+                    {
+                        if (!CAList.Contains(structure.CurrentCells[i, j].Color) && structure.CurrentCells[i, j].Color != colorToOmit)
+                        {
+
+                            temp = rand.Next(numOfStates);
+                            colorToSet = matchState.First(x => x.Value == temp).Key;
+
+                            structure.CurrentCells[i, j].Color = colorToSet;
+                            structure.CurrentCells[i, j].State = temp;
+                        }
+                        else if (matchState.ContainsKey(structure.CurrentCells[i, j].Color))
+                        {
+                            tempColor = structure.CurrentCells[i, j].Color;
+                            structure.CurrentCells[i, j].State = matchState[tempColor];  //dopasuje state z listy do koloru 
+                        }
+                        else
+                        {
+                            addedState = matchState.Count + 1;
+                            matchState.Add(structure.CurrentCells[i, j].Color, addedState);
+                            structure.CurrentCells[i, j].State = addedState;
+                        }
+
+                    }
+                }
+                updatePrevCells();
+                refreshStructureBox();
+
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Najpierw ustaw ");
+            }
+
+        }
+
+        void monteCarloMethod()
+        {
+            int steps = (int)mcUpDown.Value;
+            int i = 0;
+            do
+            {
+                monteCarlo();
+                updatePrevCells();
+                refreshStructureBox();
+                Thread.Sleep(10);
+                i++;
+            } while (i < steps);
+            CAList.Clear();
+            BoundaryList.Clear();
+        }
+
+        public void monteCarlo()
+        {
+            // int iprev, inext, jprev, jnext, sum = 0;
+            int wUpDown = (int)widthUpDown.Value;
+            int hUpDown = (int)heightUpDown.Value;
+            int numberOfStates = (int)numOfStatesUpDown.Value;
+            double jgb = 1.0;
+            double eBefore, eAfter, deltaE;
+
+            ///////dodane do randa
+            int randNumber = wUpDown * hUpDown;
+            int xprev, xnext, yprev, ynext, sum = 0;
+
+            for (int i = 0; i < wUpDown; i++)
+            {
+                for (int j = 0; j < hUpDown; j++)
+                {
+                    notMCCheckedList.Add(structure.CurrentCells[i, j]);
+                }
+            }
+
+            do
+            {
+                Cell randCell = notMCCheckedList[rand.Next(randNumber)];
+                int x = randCell.X;
+                int y = randCell.Y;
+
+                notMCCheckedList.Remove(randCell);
+                randNumber--;
+
+                if (x == 0)
+                    xprev = wUpDown - 1;
+                else
+                    xprev = x - 1;
+
+                if (x == wUpDown - 1)
+                    xnext = 0;
+                else
+                    xnext = x + 1;
+
+                if (y == 0)
+                    yprev = hUpDown - 1;
+                else
+                    yprev = y - 1;
+
+                if (y == hUpDown - 1)
+                    ynext = 0;
+                else
+                    ynext = y + 1;
+
+                //setState(wUpDown,hUpDown);
+                Color color = structure.CurrentCells[x, y].Color;
+
+
+
+                if (!CAList.Contains(color) && color != colorToOmit && (structure.CurrentCells[xprev, yprev].Color != color || structure.CurrentCells[xprev, y].Color != color
+                || structure.CurrentCells[xprev, ynext].Color != color || structure.CurrentCells[x, ynext].Color != color
+                || structure.CurrentCells[xnext, ynext].Color != color || structure.CurrentCells[xnext, y].Color != color
+                || structure.CurrentCells[xnext, yprev].Color != color || structure.CurrentCells[x, yprev].Color != color)
+                 )
+                {
+
+                    stateOfMCNeighbors.Add(structure.CurrentCells[xprev, y].State);
+
+                    stateOfMCNeighbors.Add(structure.CurrentCells[xprev, yprev].State);
+
+                    stateOfMCNeighbors.Add(structure.CurrentCells[x, yprev].State);
+
+                    stateOfMCNeighbors.Add(structure.CurrentCells[xnext, yprev].State);
+
+                    stateOfMCNeighbors.Add(structure.CurrentCells[xnext, y].State);
+
+                    stateOfMCNeighbors.Add(structure.CurrentCells[xnext, ynext].State);
+
+                    stateOfMCNeighbors.Add(structure.CurrentCells[x, ynext].State);
+
+                    stateOfMCNeighbors.Add(structure.CurrentCells[xprev, ynext].State);
+
+
+                    sum = toCalculateEnergy(x, y);
+                    eBefore = jgb * sum;
+                    int stateBefore = structure.CurrentCells[x, y].State;
+                    int numOfNewState = rand.Next(stateOfMCNeighbors.Count);   //random z liczby elementow na liscie
+                    int newState = stateOfMCNeighbors[numOfNewState];   //stan, ktory znajduje sie w wylosowanym elemencie listy
+                    int state = 0;
+                    Color newKey = matchState.First(s => s.Value == newState).Key;
+                    while (CAList.Contains(newKey) || newKey == colorToOmit)
+                    {
+                        numOfNewState = rand.Next(stateOfMCNeighbors.Count);
+                        newState = stateOfMCNeighbors[numOfNewState];
+                        newKey = matchState.First(s => s.Value == newState).Key;
+                    }
+                    structure.CurrentCells[x, y].State = newState;
+                    sum = toCalculateEnergy(x, y);
+                    eAfter = jgb * sum;
+                    deltaE = eAfter - eBefore;
+
+
+                    if (deltaE > 0)
+                    {
+                        //CHECK MAX STATE
+                            foreach (int State in stateOfMCNeighbors)
+                        {
+                            if (!checkState.ContainsKey(State))
+                                checkState.Add(State, 1);
+                            else
+                                checkState[State] = checkState[State] + 1;
+                        }
+
+                        int maxState = getMaxKeyInt(checkState);
+                      
+                        structure.CurrentCells[x, y].State = maxState;
+                        Color myKey = matchState.First(s => s.Value == maxState).Key;
+                        structure.CurrentCells[x, y].Color = myKey;      
+                        checkState.Clear();
+
+                       // structure.CurrentCells[x, y].State = stateBefore;
+                    }
+                    else
+                    {
+                        state = structure.CurrentCells[x, y].State;
+                        Color myKey = matchState.First(s => s.Value == state).Key;
+                        structure.CurrentCells[x, y].Color = myKey;
+                    }
+                    stateOfMCNeighbors.Clear();
+                }
+            } while (randNumber > 0);
+        }
+
+        int getMaxKeyInt(Dictionary<int, int> map)   //(checkState) pierwszy int - klucz - state, drugi - wartosc - ilosc wystapien
+        {
+            int max = 0;
+            int maxKeyInt = 0;
+
+            foreach (var item in map)  // item - kolor i ilosc jego wystapien
+            {
+                if (item.Value > max)  //  szuka koloru, ktory wystapil najwiecej razy (item.Value - ilość wystąpień)
+                    max = item.Value;
+            }
+            if (max == 1)
+            {
+                maxKeyInt = map.ElementAt(rand.Next(8)).Key;
+            }
+            else
+            {
+                maxKeyInt = map.FirstOrDefault(x => x.Value == max).Key;  //zwraca stan(klucz), który wystąpił najwięcej razy
+            }
+
+            return maxKeyInt;
+        }
+
+        int toCalculateEnergy(int x, int y)
+        {
+            int wUpDown = (int)widthUpDown.Value;
+            int hUpDown = (int)heightUpDown.Value;
+            int xprev, xnext, yprev, ynext = 0;
+
+            if (x == 0)
+                xprev = wUpDown - 1;
+            else
+                xprev = x - 1;
+
+            if (x == wUpDown - 1)
+                xnext = 0;
+            else
+                xnext = x + 1;
+
+            if (y == 0)
+                yprev = hUpDown - 1;
+            else
+                yprev = y - 1;
+
+            if (y == hUpDown - 1)
+                ynext = 0;
+            else
+                ynext = y + 1;
+
+            int[] neighborsTab = { 0, 0, 0, 0, 0, 0, 0, 0 };   //1-deltaKroneckera
+            int sum = 0;
+
+            if (structure.CurrentCells[x, y].State != structure.CurrentCells[xprev, y].State)
+                neighborsTab[0] = 1;
+
+            if (structure.CurrentCells[x, y].State != structure.CurrentCells[xprev, yprev].State)
+                neighborsTab[1] = 1;
+
+            if (structure.CurrentCells[x, y].State != structure.CurrentCells[x, yprev].State)
+                neighborsTab[2] = 1;
+
+            if (structure.CurrentCells[x, y].State != structure.CurrentCells[xnext, yprev].State)
+                neighborsTab[3] = 1;
+
+            if (structure.CurrentCells[x, y].State != structure.CurrentCells[xnext, y].State)
+                neighborsTab[4] = 1;
+
+            if (structure.CurrentCells[x, y].State != structure.CurrentCells[xnext, ynext].State)
+                neighborsTab[5] = 1;
+
+            if (structure.CurrentCells[x, y].State != structure.CurrentCells[x, ynext].State)
+                neighborsTab[6] = 1;
+
+            if (structure.CurrentCells[x, y].State != structure.CurrentCells[xprev, ynext].State)
+                neighborsTab[7] = 1;
+
+            for (int i = 0; i < neighborsTab.Length; i++)
+            {
+                sum += neighborsTab[i];
+            }
+
+            return sum;
+        }
+
+        void clearStates()
+        {
+            List<Color> statesToDelete = new List<Color>();
+            foreach (KeyValuePair<Color, int> entry in matchState)
+            {
+                if (!CAList.Contains(entry.Key))
+                    statesToDelete.Add(entry.Key);
+            }
+
+            foreach (Color item in statesToDelete)
+            {
+                matchState.Remove(item);
+            }
+        }
+
+        /////////////////...............ENERGY DISTRIBUTION............///////////////////////
+
+
+            /// <summary>
+            /// TO DO: dodanie jeszcze nucleation type - increasing itd
+            /// </summary>
+        Dictionary<Color, int> colorToEnergy = new Dictionary<Color, int>();
+        bool colorToEnergySet = false;
+
+        private void distributeButton_Click(object sender, EventArgs e)
+        {
+            if (!colorToEnergySet)
+            {
+                prepareScaleOfEnergy();
+            }
+            distributeEnergy();
+            //colorToEnergy.Clear();
+        }
+
+        private void button1_Click(object sender, EventArgs e)  //showEnergyButton
+        {
+            Form energyForm = new Form();
+            energyForm.Size = new Size(515, 560);
+
+            energyForm.Show();
+            BackgroundWorker bg = new BackgroundWorker();
+            bg.RunWorkerAsync(energyForm);
+            bg.DoWork += bg_DoWork;
+
+          
+
+            //Image img = structure.setEnergyColor(structureBox.Width, structureBox.Height);
+            // Bitmap bm = structure.setEnergyColor(structureBox.Width, structureBox.Height);
+            //PictureBox energyBox = new PictureBox();
+            //energyBox.Size = new Size(structureBox.Width, structureBox.Height);
+            //energyBox.Image = structure.setEnergyColor(structureBox.Width, structureBox.Height);
+            //Form energyForm = new Form();
+            //energyForm.Size = new Size(515,560);
+            //energyForm.Controls.Add(energyBox);       
+            //energyForm.Show();
+        }
+
+        private void bg_DoWork(object sender, DoWorkEventArgs e)
+        {
+            Form form = (Form)e.Argument;
+            PictureBox pb = new PictureBox();
+            Image img;
+            if (form.InvokeRequired)
+                form.Invoke(new MethodInvoker(() => { form.Controls.Add(pb); }));
+            else
+                form.Controls.Add(pb);
+            do
+            {
+                img = structure.setEnergyColor(structureBox.Width, structureBox.Height);
+                if (pb.InvokeRequired)
+                    pb.Invoke(new MethodInvoker(() =>
+                    {
+                        pb.Size = new Size(structureBox.Width, structureBox.Height);
+                        pb.Image = img;
+                        pb.Refresh();
+                    }));
+                else
+                {
+                    pb.Size = new Size(structureBox.Width, structureBox.Height);
+                    pb.Image = img;
+                    pb.Refresh();
+                }
+                Thread.Sleep(10);
+
+            } while (true);
+        }
+
+
+
+        //private void showEnergyButton_MouseHover(object sender, EventArgs e)
+        //{
+        //energyPictureBox.Visible = true;
+        //structureBox.Visible = false;
+        //energyPictureBox.Image = structure.setEnergyColor(structureBox.Width, structureBox.Height);
+        //Bitmap bm = structure.setEnergyColor(structureBox.Width, structureBox.Height);
+        //}
+
+        //private void showEnergyButton_Click(object sender, EventArgs e) { 
+
+        //    Image img = structure.setEnergyColor(structureBox.Width, structureBox.Height);
+        //      Bitmap bm = structure.setEnergyColor(structureBox.Width, structureBox.Height);
+        //    PictureBox energyBox = new PictureBox();
+        //    energyBox.Size = new Size(500, 500);
+        //    energyBox.Image = structure.setEnergyColor(structureBox.Width, structureBox.Height);
+
+        //    Form energyForm = new Form();
+        //    energyForm.Size = new Size(500, 500);
+        //    energyForm.Controls.Add(energyBox);
+        //    energyForm.Show();
+        //}
+
+        //private void showEnergyButton_MouseLeave(object sender, EventArgs e)
+        //{
+        //    energyPictureBox.Visible = false;
+        //    structureBox.Visible = true;
+        //}
+
+        void prepareScaleOfEnergy()   
+        {
+            colorToEnergy.Add(Color.FromArgb(82, 206, 0), 0); //strong green
+            colorToEnergy.Add(Color.FromArgb(146, 210, 0), 1);   //green
+            colorToEnergy.Add(Color.FromArgb(213, 213, 0), 2); //vivid yellow
+            colorToEnergy.Add(Color.FromArgb(217, 152, 0), 3);  //vivid orange
+            colorToEnergy.Add(Color.FromArgb(221, 89, 0), 4);// orange
+            colorToEnergy.Add(Color.FromArgb(255, 23, 0), 5); //red
+            colorToEnergySet = true;
+
+
+        }
+
+        void distributeEnergy()
+        {
+
+            int energyInside = (int)energyInsideNumericUpDown.Value;
+            int energyOnEdges = (int)energyOnEdgesNumericUpDown.Value;
+
+            if (homogenousRadioButton.Checked)
+            {
+                for (int i = 0; i < structure.StructWidth; i++)
+                {
+                    for (int j = 0; j < structure.StructHeight; j++)
+                    {
+                        structure.CurrentCells[i, j].Energy = energyInside;
+                        structure.CurrentCells[i, j].EnergyColor = colorToEnergy.First(x => x.Value == energyInside).Key;
+                    }
+                }
+            }
+            else
+            {
+                int wUpDown = (int)widthUpDown.Value;
+                int hUpDown = (int)heightUpDown.Value;
+                int iprev, inext, jprev, jnext = 0;
+
+                for (int i = 0; i < structure.StructWidth; i++)
+                {
+                    for (int j = 0; j < structure.StructHeight; j++)
+                    {
+                        if (i == 0)
+                            iprev = wUpDown - 1;
+                        else
+                            iprev = i - 1;
+
+                        if (i == wUpDown - 1)
+                            inext = 0;
+                        else
+                            inext = i + 1;
+
+                        if (j == 0)
+                            jprev = hUpDown - 1;
+                        else
+                            jprev = j - 1;
+
+                        if (j == hUpDown - 1)
+                            jnext = 0;
+                        else
+                            jnext = j + 1;
+
+                        Color color = structure.CurrentCells[i, j].Color;
+
+                        if (color != Color.FromArgb(0, 0, 0))
+                        {
+                            if (structure.CurrentCells[iprev, jprev].Color != color && structure.CurrentCells[iprev, jprev].Color != Color.FromArgb(0, 0, 0) ||
+                                structure.CurrentCells[iprev, j].Color != color && structure.CurrentCells[iprev, j].Color != Color.FromArgb(0, 0, 0) ||
+                                structure.CurrentCells[iprev, jnext].Color != color && structure.CurrentCells[iprev, jnext].Color != Color.FromArgb(0, 0, 0) ||
+                                structure.CurrentCells[i, jnext].Color != color && structure.CurrentCells[i, jnext].Color != Color.FromArgb(0, 0, 0) ||
+                                structure.CurrentCells[inext, jnext].Color != color && structure.CurrentCells[inext, jnext].Color != Color.FromArgb(0, 0, 0) ||
+                                structure.CurrentCells[inext, j].Color != color && structure.CurrentCells[inext, j].Color != Color.FromArgb(0, 0, 0) ||
+                                structure.CurrentCells[inext, jprev].Color != color && structure.CurrentCells[inext, jprev].Color != Color.FromArgb(0, 0, 0) ||
+                                structure.CurrentCells[i, jprev].Color != color && structure.CurrentCells[i, jprev].Color != Color.FromArgb(0, 0, 0))
+                            {
+                                structure.CurrentCells[i, j].Energy = energyOnEdges;
+                                structure.CurrentCells[i, j].EnergyColor = colorToEnergy.First(x => x.Value == energyOnEdges).Key;
+                            }
+                            else
+                            {
+                                structure.CurrentCells[i, j].Energy = energyInside;
+                                structure.CurrentCells[i, j].EnergyColor = colorToEnergy.First(x => x.Value == energyInside).Key;
+                            }
+                        }
+                    }
+                }
+            }
+            updatePrevCells();  
+        }
+
+        /////////////////...............NUCLEATION............///////////////////////
+
+      void startRecrystalizationButton_Click(object sender, EventArgs e)
+        {
+            setState();
+
+
+            //////Rekrystalizacja
+            thread = new Thread(new ThreadStart(recrystalization));
+            thread.IsBackground = true;
+            thread.Start();
+
+        }
+
+        public void setState()
+        {
+            int wUpDown = (int)widthUpDown.Value;
+            int hUpDown = (int)heightUpDown.Value;
+            int stateToGrain = 0;
+            Color color;
+
+            for (int i = 0; i < wUpDown; i++)
+            {
+                for (int j = 0; j < hUpDown; j++)
+                {
+                    color = structure.CurrentCells[i, j].Color;
+                    if (!matchState.ContainsKey(color))
+                    {
+                        while (matchState.ContainsValue(stateToGrain))
+                            stateToGrain++;
+                        structure.CurrentCells[i, j].State = stateToGrain;
+                        matchState.Add(color, stateToGrain);
+                        stateToGrain++;
+
+                    }
+                    else
+                        structure.CurrentCells[i, j].State = matchState[color];
+                }
+            }
+        }
+
+        void nucleation(int numOfNucleations) {
+
+            //int nucleonsOnStart = (int)nucleonsOnStartNumericUpDown.Value;
+            int x, y, xprev, xnext, yprev, ynext = 0;
+            int wUpDown = (int)widthUpDown.Value;
+            int hUpDown = (int)heightUpDown.Value;
+
+            if (onEdgeCheckBox.Checked)
+            {
+                for (int i = 0; i < numOfNucleations; i++)
+                {
+
+                    x = rand.Next(wUpDown);
+                    y = rand.Next(hUpDown);
+
+                    if (x == 0)
+                        xprev = wUpDown - 1;
+                    else
+                        xprev = x - 1;
+
+                    if (x == wUpDown - 1)
+                        xnext = 0;
+                    else
+                        xnext = x + 1;
+
+                    if (y == 0)
+                        yprev = hUpDown - 1;
+                    else
+                        yprev = y - 1;
+
+                    if (y == hUpDown - 1)
+                        ynext = 0;
+                    else
+                        ynext = y + 1;
+
+                    Color color = structure.CurrentCells[x, y].Color;
+
+                    if (structure.CurrentCells[x, y].Energy!=0 && (structure.CurrentCells[xprev, yprev].Color != color || structure.CurrentCells[xprev, y].Color != color || structure.CurrentCells[xprev, ynext].Color != color || structure.CurrentCells[x, ynext].Color != color
+                        || structure.CurrentCells[xnext, ynext].Color != color || structure.CurrentCells[xnext, y].Color != color || structure.CurrentCells[xnext, yprev].Color != color || structure.CurrentCells[x, yprev].Color != color))
+                    {
+                        int r = rand.Next(255);
+                        structure.CurrentCells[x, y].Color = Color.FromArgb(r, 0, 0);
+                        if (matchState.ContainsKey(structure.CurrentCells[x, y].Color))
+                        {
+                            structure.CurrentCells[x, y].State = matchState[structure.CurrentCells[x, y].Color];  //dopasuje state z listy do koloru 
+                        }
+                        else
+                        {
+                            int addedState = matchState.Count + 1;
+                            matchState.Add(structure.CurrentCells[x, y].Color, addedState);
+                            structure.CurrentCells[x, y].State = addedState;
+                        }
+
+
+                        structure.CurrentCells[x, y].Energy = 0;
+                        structure.CurrentCells[x, y].EnergyColor = colorToEnergy.First(a => a.Value == 0).Key;
+
+                    }
+                    else
+                        i--;
+                }
+                // colorToEnergy.Clear();
+                updatePrevCells();
+                refreshStructureBox();
+            }
+            else
+            {
+
+                for (int i = 0; i < numOfNucleations; i++)
+                {
+                    int randX = rand.Next(wUpDown);
+                    int randY = rand.Next(hUpDown);
+
+                    setRandomColor(structure.CurrentCells[randX, randY]);
+                    structure.CurrentCells[randX, randY].Energy = 0;
+                    structure.CurrentCells[randX, randY].EnergyColor = colorToEnergy.First(a => a.Value == 0).Key;
+                }
+                updatePrevCells();
+                refreshStructureBox();
+            }
+
+
+        }
+        void recrystalization()
+        {
+            int i = 0;
+            int nucleationOnStart = 0;
+          
+            int counter = 1;
+            string value = null;
+            int iterationCounter = 0;
+
+            if (nucleonsOnStartNumericUpDown.InvokeRequired)
+            {
+                nucleonsOnStartNumericUpDown.Invoke(new MethodInvoker(() => { nucleationOnStart = (int)nucleonsOnStartNumericUpDown.Value; }));
+            }
+
+            if (nucleationTypeComboBox.InvokeRequired)
+            {
+                nucleationTypeComboBox.Invoke(new MethodInvoker(() => { value = nucleationTypeComboBox.SelectedItem.ToString(); }));
+            }
+
+            if (iterationsNumericUpDown.InvokeRequired)
+            {
+                iterationsNumericUpDown.Invoke(new MethodInvoker(() => { iterationCounter = (int)iterationsNumericUpDown.Value; }));
+            }
+
+            nucleation(nucleationOnStart);
+
+            do
+            {
+                if (value.Contains("Constant"))
+                {
+                    if (i % iterationCounter == 0)
+                    {
+                        nucleation(nucleationOnStart);
+                    }
+                }
+                else if (value.Contains("Increasing"))
+                {
+                    if (i % iterationCounter == 0)
+                    {
+                            nucleation(nucleationOnStart*counter);
+                    }
+
+                }
+                counter++;
+
+
+                recrystal();
+                updatePrevCells();
+                refreshStructureBox();
+                Thread.Sleep(10);
+                i++;
+            } while (!allRecrystalized());
+            CAList.Clear();
+            BoundaryList.Clear();
+        }
+
+        public bool allRecrystalized() {
+            int wUpDown = (int)widthUpDown.Value;
+            int hUpDown = (int)heightUpDown.Value;
+            bool recrystal = true;
+
+            for (int i = 0; i < wUpDown; i++)
+            {
+                for (int j = 0; j < hUpDown; j++)
+                {
+                    if (structure.CurrentCells[i, j].Energy != 0)
+                        recrystal = false;
+                }
+            }
+            return recrystal;
+        }
+
+        public void recrystal()
+        {
+            // int iprev, inext, jprev, jnext, sum = 0;
+            int wUpDown = (int)widthUpDown.Value;
+            int hUpDown = (int)heightUpDown.Value;
+            int numberOfStates = (int)numOfStatesUpDown.Value;
+            double jgb = 1.0;
+            double eBefore, eAfter, deltaE;
+
+            ///////dodane do randa
+            int randNumber = wUpDown * hUpDown;
+            int xprev, xnext, yprev, ynext, sum = 0;
+
+            for (int i = 0; i < wUpDown; i++)
+            {
+                for (int j = 0; j < hUpDown; j++)
+                {
+                    notMCCheckedList.Add(structure.CurrentCells[i, j]);
+                }
+            }
+
+            do
+            {
+                Cell randCell = notMCCheckedList[rand.Next(randNumber)];
+                int x = randCell.X;
+                int y = randCell.Y;
+
+                notMCCheckedList.Remove(randCell);
+                randNumber--;
+
+                if (x == 0)
+                    xprev = wUpDown - 1;
+                else
+                    xprev = x - 1;
+
+                if (x == wUpDown - 1)
+                    xnext = 0;
+                else
+                    xnext = x + 1;
+
+                if (y == 0)
+                    yprev = hUpDown - 1;
+                else
+                    yprev = y - 1;
+
+                if (y == hUpDown - 1)
+                    ynext = 0;
+                else
+                    ynext = y + 1;
+
+                if (structure.CurrentCells[xprev, yprev].Energy == 0 || structure.CurrentCells[xprev, y].Energy == 0
+                || structure.CurrentCells[xprev, ynext].Energy == 0 || structure.CurrentCells[x, ynext].Energy == 0
+                || structure.CurrentCells[xnext, ynext].Energy == 0 || structure.CurrentCells[xnext, y].Energy == 0
+                || structure.CurrentCells[xnext, yprev].Energy == 0 || structure.CurrentCells[x, yprev].Energy == 0)
+                {
+
+                    //setState(wUpDown,hUpDown);
+                    Color color = structure.CurrentCells[x, y].Color;
+                    
+                    if (!CAList.Contains(color) && color != colorToOmit && (structure.CurrentCells[xprev, yprev].Color != color || structure.CurrentCells[xprev, y].Color != color
+                    || structure.CurrentCells[xprev, ynext].Color != color || structure.CurrentCells[x, ynext].Color != color
+                    || structure.CurrentCells[xnext, ynext].Color != color || structure.CurrentCells[xnext, y].Color != color
+                    || structure.CurrentCells[xnext, yprev].Color != color || structure.CurrentCells[x, yprev].Color != color)
+                     )
+                    {
+
+                        stateOfMCNeighbors.Add(structure.CurrentCells[xprev, y].State);
+
+                        stateOfMCNeighbors.Add(structure.CurrentCells[xprev, yprev].State);
+
+                        stateOfMCNeighbors.Add(structure.CurrentCells[x, yprev].State);
+
+                        stateOfMCNeighbors.Add(structure.CurrentCells[xnext, yprev].State);
+
+                        stateOfMCNeighbors.Add(structure.CurrentCells[xnext, y].State);
+
+                        stateOfMCNeighbors.Add(structure.CurrentCells[xnext, ynext].State);
+
+                        stateOfMCNeighbors.Add(structure.CurrentCells[x, ynext].State);
+
+                        stateOfMCNeighbors.Add(structure.CurrentCells[xprev, ynext].State);
+
+
+                        sum = toCalculateEnergy(x, y);
+                        eBefore = jgb * sum + structure.CurrentCells[x, y].Energy;
+                        int stateBefore = structure.CurrentCells[x, y].State;
+                        int maxNeighbourState = 0;
+                        foreach (int State in stateOfMCNeighbors)
+                        {
+                            if (State >= maxNeighbourState)
+                                maxNeighbourState = State;
+                        }
+
+                        int newState = maxNeighbourState;   //najwyzszy stan z sasiadow
+                        structure.CurrentCells[x, y].State = newState;
+                        sum = toCalculateEnergy(x, y);
+                        eAfter = jgb * sum;
+                        deltaE = eAfter - eBefore;
+
+                        if (deltaE > 0)
+                        {
+                            structure.CurrentCells[x, y].State = stateBefore;
+                        }
+                        else
+                        {
+                            structure.CurrentCells[x, y].Energy = 0;
+                            structure.CurrentCells[x,y].EnergyColor = colorToEnergy.First(a => a.Value == 0).Key;
+                            //int state = structure.CurrentCells[x, y].State;
+                            Color myKey = matchState.First(s => s.Value == newState).Key;
+                            structure.CurrentCells[x, y].Color = myKey;
+                        }
+                        stateOfMCNeighbors.Clear();
+                    }
+                }
+            } while (randNumber > 0);
+        }
     }
 }
